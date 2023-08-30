@@ -1,5 +1,5 @@
 # Predicting Market Costs
-Building regression model to accurately predict the costs of products within a diverse market landscape. This task for a kaggle comptetion hosted on this (link)[https://www.kaggle.com/competitions/ieee-mansb-victoris-2/]
+Building regression model to accurately predict the costs of products within a diverse market landscape. This task for a kaggle comptetion hosted on this [link](https://www.kaggle.com/competitions/ieee-mansb-victoris-2/)
 
 ## Data Description
 
