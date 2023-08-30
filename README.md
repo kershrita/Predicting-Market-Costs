@@ -1,7 +1,9 @@
 # Predicting Market Costs
 Building regression model to accurately predict the costs of products within a diverse market landscape. This task for a kaggle comptetion hosted on this (link)[https://www.kaggle.com/competitions/ieee-mansb-victoris-2/]
 
-## Data Description| Column Name        | Description                                           |
+## Data Description
+
+| Column Name        | Description                                           |
 |--------------------|-------------------------------------------------------|
 | Person Description | Description of the person visiting the market         |
 | Place Code         | Code for each place (format: cityCode_cityCode)      |
