@@ -9,7 +9,6 @@ def set_index(df):
     return df
 
 
-
 def split_person_description(df):
     
     df[["personal", "deg_work"]] = (
@@ -34,6 +33,17 @@ def split_person_description(df):
     return df
 
 
+def split_place_code(df):
+    df[["Store Code", "Country ISO2"]] = (
+        df["Place Code"]
+        .str
+        .split("_", expand=True)
+    )
+    
+    df = df.drop(columns="Place Code")
+    return df
+
+
 def split_customer_order(df):
     df[["ord_dep", "Oreder Brand"]] = (
         df["Customer Order"]
@@ -41,7 +51,7 @@ def split_customer_order(df):
         .split(", Ordered Brand : ", expand=True)
     )
     
-    df[["Product", "Department", "blank"]] = (
+    df[["Order", "Department", "blank"]] = (
         df["ord_dep"]
         .str
         .split("from | department", expand=True)
@@ -71,12 +81,21 @@ def encode_market_features(df):
     return df
 
 
-
 def transform_cost_sales(df):
-    df["Store Sales"] = df["Store Sales"].str.split(expand=True)[0].astype(float) * 1e6
-    df["Store Cost"] = df["Store Cost"].str.split(expand=True)[0].astype(float) * 1e6
+    df["Store Sales"] = (
+        df["Store Sales"]
+        .str
+        .split(expand=True)[0]
+        .astype(float)
+    ) * 1e6
+    
+    df["Store Cost"] = (
+        df["Store Cost"]
+        .str
+        .split(expand=True)[0]
+        .astype(float)
+    ) * 1e6
     return df
-
 
 
 def extract_product_weights(df):
@@ -97,12 +116,10 @@ def extract_product_weights(df):
     return df
 
 
-
 def transform_recyclable(df):
     mapping = {'recyclable': 'yes', 'non recyclable': 'no'}
     df["Is Recyclable?"] = df["Is Recyclable?"].map(mapping)
     return df
-
 
 
 def transform_income(df):
@@ -114,6 +131,7 @@ def transform_income(df):
             .astype(float) * 1000
         )
         df = df.drop(columns="Min. Yearly Income")
+        
     elif "Min. Person Yearly Income" in df.columns:
         df["Min. Person Yearly Income"] = (
             df["Min. Person Yearly Income"]
@@ -121,6 +139,7 @@ def transform_income(df):
             .split("K+", expand=True)[0]
             .astype(float) * 1000
         )
+        
     elif "Yearly Income" in df.columns:
         df["Min. Person Yearly Income"] = (
             df["Yearly Income"]
@@ -167,20 +186,33 @@ def calculate_package_weight(df):
 
 
 def fill_nulls(df):
-    number_cols = df.select_dtypes([float, int]).columns
+    int_cols = df.select_dtypes([int, bool]).columns
+    float_cols = df.select_dtypes(float).columns
     cat_cols = df.select_dtypes("object").columns
     
     if "Cost" in df.columns:
-        df[number_cols] = (
-            df[number_cols]
-            .fillna(df[number_cols].mean())
+        df[float_cols] = (
+            df[float_cols]
+            .fillna(df[float_cols].mean())
         )
         
+        for col in int_cols:
+            df[col] = (
+                df[col]
+                .fillna(df[col].mode()[0])
+            )
+        
     else:
-        df[number_cols] = (
-            df[number_cols]
-            .fillna(df[number_cols].mean())
+        df[float_cols] = (
+            df[float_cols]
+            .fillna(df[float_cols].mean())
         )
+        
+        for col in int_cols:
+            df[col] = (
+                df[col]
+                .fillna(df[col].mode()[0])
+            )
         
         for col in cat_cols:
             df[col] = (
@@ -188,4 +220,26 @@ def fill_nulls(df):
                 .fillna(df[col].mode()[0])
             )
 
+    return df
+
+
+def encode_columns(df):
+    mapping = {'yes': 1, 'no': 0}
+    df["Is Recyclable?"] = (
+        df["Is Recyclable?"]
+        .map(mapping)
+        .astype(bool)
+    )
+    
+    mapping = {'five': 5, 'four': 4, 'three': 3, 'two': 2, 'one': 1, 'no': 0}
+    df["Children"] = (
+        df["Children"]
+        .map(mapping)
+    )
+    
+    df["Children"] = (
+        df["Children"]
+        .fillna(df["Children"].mode()[0])
+        .astype(int)
+    )
     return df
