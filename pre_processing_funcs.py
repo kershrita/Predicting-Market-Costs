@@ -243,3 +243,20 @@ def encode_columns(df):
         .astype(int)
     )
     return df
+
+def wrangle(df):
+    
+    # high demintionallity columns
+    df = df.drop(columns=["Bar For Salad", "Ready Food", "Florist", "Store Sales", "Net Weight", "Store Area"])
+
+    # add new feature
+    def calculate_family_expenses(row):
+        if row["Marriage"] == "Married":
+            return row["Min. Person Yearly Income"] / (row["Children"] + 2)
+        else:
+            return row["Min. Person Yearly Income"] / (row["Children"] + 1)
+
+    df["Family Expenses"] = df.apply(lambda row: calculate_family_expenses(row), axis=1)
+    
+    return df
+
