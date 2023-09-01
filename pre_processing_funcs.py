@@ -1,5 +1,8 @@
 import pandas as pd
 
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+
 def set_index(df):
     df = (
         df
@@ -45,7 +48,7 @@ def split_place_code(df):
 
 
 def split_customer_order(df):
-    df[["ord_dep", "Oreder Brand"]] = (
+    df[["ord_dep", "Order Brand"]] = (
         df["Customer Order"]
         .str
         .split(", Ordered Brand : ", expand=True)
@@ -191,10 +194,9 @@ def fill_nulls(df):
     cat_cols = df.select_dtypes("object").columns
     
     if "Cost" in df.columns:
-        df[float_cols] = (
-            df[float_cols]
-            .fillna(df[float_cols].mean())
-        )
+        
+        imputer = IterativeImputer()
+        df[float_cols] = imputer.fit_transform(df[float_cols])
         
         for col in int_cols:
             df[col] = (
@@ -203,10 +205,8 @@ def fill_nulls(df):
             )
         
     else:
-        df[float_cols] = (
-            df[float_cols]
-            .fillna(df[float_cols].mean())
-        )
+        imputer = IterativeImputer()
+        df[float_cols] = imputer.fit_transform(df[float_cols])
         
         for col in int_cols:
             df[col] = (
