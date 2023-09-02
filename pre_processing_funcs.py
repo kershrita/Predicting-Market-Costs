@@ -80,7 +80,21 @@ def encode_market_features(df):
             .apply(lambda x: 1 if pd.notna(x) and feat in x else 0)
         )
         
-    df = df.drop(columns="Additional Features in market")
+    # Amenities Score
+    df['Amenities Score'] = (
+        df['Coffee Bar'].astype(int) + 
+        df['Video Store'].astype(int) + 
+        df['Bar For Salad'].astype(int) + 
+        df['Florist'].astype(int) +
+        df['Ready Food'].astype(int)
+    )
+    
+    df = df.drop(columns=["Additional Features in market",
+                          "Bar For Salad",
+                          "Ready Food",
+                          "Florist",
+                          "Coffee Bar",
+                          "Video Store"])
     return df
 
 
@@ -248,16 +262,6 @@ def wrangle(df):
     
     cols_to_drop = []
     
-    # Amenities Score
-    df['Amenities Score'] = (
-        df['Coffee Bar'].astype(int) + 
-        df['Video Store'].astype(int) + 
-        df['Bar For Salad'].astype(int) + 
-        df['Florist'].astype(int) +
-        df['Ready Food'].astype(int)
-    )
-    cols_to_drop+=["Bar For Salad", "Ready Food", "Florist", "Coffee Bar", "Video Store"]
-
     # calculat family expenses
     def calculate_family_expenses(row):
         if row["Marriage"] == "Married":
@@ -274,10 +278,6 @@ def wrangle(df):
     # Calculate the length of each row in the "Promotion Name" column 
     df['Promotion Name Length'] = df['Promotion Name'].apply(lambda x: len(x))
     df['Promotion Name Length'] = df['Promotion Name Length'].astype(int)
-
-    # Calculate the length of each row in the "Store Kind" column 
-    df['Store Kind Length'] = df['Store Kind'].apply(lambda x: len(x))
-    df['Store Kind Length'] = df['Store Kind Length'].astype(int)
     
     # Promotion Frequency
     promotion_frequency = df['Promotion Name'].value_counts().reset_index()
