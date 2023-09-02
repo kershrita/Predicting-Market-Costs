@@ -246,10 +246,19 @@ def encode_columns(df):
 
 def wrangle(df):
     
-    # high demintionallity columns
-    df = df.drop(columns=["Bar For Salad", "Ready Food", "Florist", "Store Sales", "Net Weight", "Store Area"])
+    cols_to_drop = []
+    
+    # Amenities Score
+    df['Amenities Score'] = (
+        df['Coffee Bar'].astype(int) + 
+        df['Video Store'].astype(int) + 
+        df['Bar For Salad'].astype(int) + 
+        df['Florist'].astype(int) +
+        df['Ready Food'].astype(int)
+    )
+    cols_to_drop+=["Bar For Salad", "Ready Food", "Florist", "Coffee Bar", "Video Store"]
 
-    # add new feature
+    # calculat family expenses
     def calculate_family_expenses(row):
         if row["Marriage"] == "Married":
             return row["Min. Person Yearly Income"] / (row["Children"] + 2)
@@ -257,6 +266,49 @@ def wrangle(df):
             return row["Min. Person Yearly Income"] / (row["Children"] + 1)
 
     df["Family Expenses"] = df.apply(lambda row: calculate_family_expenses(row), axis=1)
+
+    # Store Efficiency
+    df['Store Efficiency'] = df['Store Sales'] / df['Store Area']
+    cols_to_drop.append("Store Sales")
+
+    # Calculate the length of each row in the "Promotion Name" column 
+    df['Promotion Name Length'] = df['Promotion Name'].apply(lambda x: len(x))
+    df['Promotion Name Length'] = df['Promotion Name Length'].astype(int)
+
+    # Calculate the length of each row in the "Store Kind" column 
+    df['Store Kind Length'] = df['Store Kind'].apply(lambda x: len(x))
+    df['Store Kind Length'] = df['Store Kind Length'].astype(int)
     
+    # Promotion Frequency
+    promotion_frequency = df['Promotion Name'].value_counts().reset_index()
+    promotion_frequency.columns = ['Promotion Name', 'Promotion Frequency']
+    df = df.merge(promotion_frequency, on='Promotion Name', how='left')
+    
+    # Income Level
+    df['Income Level'] = (
+        pd.cut(
+            df['Min. Person Yearly Income'],
+            bins=[0, 25000, 50000, float('inf')],
+            labels=['Low', 'Middle', 'High']
+        )
+    )
+
+    # Price Tier
+    df['Price Tier'] = (
+        pd.cut(
+            df['Gross Weight'],
+            bins=[0, 5, 10, float('inf')],
+            labels=['Low Price', 'Medium Price', 'High Price']
+        )
+    )
+
+    # Calculate order popularity
+    order_popularity = df['Order'].value_counts().reset_index()
+    order_popularity.columns = ['Order', 'Order Popularity']
+    df = df.merge(order_popularity, on='Order', how='left')
+    
+    cols_to_drop+=["Frozen Area", "Store Area", "Store Cost", "Net Weight"]
+    
+    df = df.drop(columns=cols_to_drop)
     return df
 
