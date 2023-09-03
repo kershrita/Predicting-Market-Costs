@@ -14,25 +14,25 @@ def set_index(df):
 
 def split_person_description(df):
     
-    df[["personal", "deg_work"]] = (
+    df[["personal", "Degree Work"]] = (
         df["Person Description"]
         .str
         .split(", education: ", expand=True)
     )
     
-    df[["Marriage", "Gender", "with", "Children", "tc"]] = (
+    df[["Marriage", "Gender", "blank1", "Children", "blank2"]] = (
         df["personal"]
         .str
         .split(expand=True)
     )
     
     df[["Degree", "Work"]] = (
-        df["deg_work"]
+        df["Degree Work"]
         .str
         .split("working as", expand=True)
     )
     
-    df = df.drop(columns=["Person Description", "personal", "with", "tc", "deg_work"])
+    df = df.drop(columns=["Person Description", "personal", "blank1", "blank2"])
     return df
 
 
@@ -234,28 +234,6 @@ def fill_nulls(df):
                 .fillna(df[col].mode()[0])
             )
 
-    return df
-
-
-def encode_columns(df):
-    mapping = {'yes': 1, 'no': 0}
-    df["Is Recyclable?"] = (
-        df["Is Recyclable?"]
-        .map(mapping)
-        .astype(bool)
-    )
-    
-    mapping = {'five': 5, 'four': 4, 'three': 3, 'two': 2, 'one': 1, 'no': 0}
-    df["Children"] = (
-        df["Children"]
-        .map(mapping)
-    )
-    
-    df["Children"] = (
-        df["Children"]
-        .fillna(df["Children"].mode()[0])
-        .astype(int)
-    )
     return df
 
 def wrangle(df):
