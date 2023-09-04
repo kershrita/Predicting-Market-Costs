@@ -4,6 +4,7 @@ Building regression model to accurately predict the costs of products within a d
 **Kaggle Notebooks:**
 
 - [Data Pre-processing](https://www.kaggle.com/code/kershrita/market-costs-data-preprocessing-guide)
+- [Model Building](https://www.kaggle.com/code/kershrita/market-costs-model-feature-engineering-guide)
 
 ## Data Description
 
